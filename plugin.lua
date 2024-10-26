@@ -1,7 +1,7 @@
 -- Original code by Kusa
 
 function draw()
-    imgui.Begin("Align")
+    imgui.Begin("SmartAlign")
 
     state.IsWindowHovered = imgui.IsWindowHovered()
 
@@ -14,26 +14,40 @@ function draw()
     local mspb = 60000 / bpm
     local msptl = mspb * 4
 
+    local noteTimes = {}
+
+    for _, n in pairs(map.HitObjects) do
+        table.insert(noteTimes, n.StartTime)        
+    end
+
     if imgui.Button("Align Timing Points with Notes") then
         local times = {}
         local timingpoints = {}
         for time=starttime,endtime,msptl do
-            local tempTime = math.floor(time) + 2
-            table.insert(times, map.GetNearestSnapTimeFromTime(false, 1, tempTime))
+            local originalTime = math.floor(time)
+            while (noteTimes[1] < originalTime - 5) do
+                table.remove(noteTimes, 1)
+            end
+            if (math.abs(noteTimes[1] - originalTime) <= 5) then
+                table.insert(times, noteTimes[1])
+                print(noteTimes[1])
+            else
+                table.insert(times, originalTime)
+            end
         end
         for _,time in pairs(times) do
             table.insert(timingpoints, utils.CreateTimingPoint(time,bpm,signature))
         end
-        actions.RemoveTimingPoint(timingpoint)
-        actions.PlaceTimingPointBatch(timingpoints)
+        actions.PerformBatch({
+            utils.CreateEditorAction(action_type.AddTimingPointBatch, timingpoints),
+            utils.CreateEditorAction(action_type.RemoveTimingPoint, timingpoint)
+        })
     end
     
-    imgui.Text("StartTime: " .. starttime)
-    imgui.Text("EndTime: " .. endtime)
-    imgui.Text("BPM: " .. bpm)
-    imgui.Text("Length: " .. length)
-    imgui.Text("MsPB: " .. mspb)
-    imgui.Text("MsPTL: " .. msptl)
+    imgui.Text("Will Align From: " .. starttime)
+    imgui.Text("Will Align To: " .. endtime)
+    imgui.Text("Current BPM: " .. bpm)
+    imgui.Text("Current Signature: " .. signature)
 
     imgui.End()
 end
