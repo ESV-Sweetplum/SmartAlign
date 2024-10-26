@@ -3,16 +3,19 @@
 function draw()
     imgui.Begin("SmartAlign")
 
-    state.IsWindowHovered = imgui.IsWindowHovered()
-
     local timingpoint = state.CurrentTimingPoint
     local starttime = timingpoint.StartTime
     local length = map.GetTimingPointLength(timingpoint)
     local endtime = starttime + length
-    local signature = timingpoint.Signature
+    local signature = state.GetValue("signature") or 4
+    if (timingpoint.Signature == time_signature.Quadruple) then
+        signature = 4
+    elseif (timingpoint.Signature == time_signature.Triple) then
+        signature = 3
+    end
     local bpm = timingpoint.Bpm
     local mspb = 60000 / bpm
-    local msptl = mspb * 4
+    local msptl = mspb * signature
 
     local noteTimes = {}
 
@@ -30,7 +33,6 @@ function draw()
             end
             if (math.abs(noteTimes[1] - originalTime) <= 5) then
                 table.insert(times, noteTimes[1])
-                print(noteTimes[1])
             else
                 table.insert(times, originalTime)
             end
@@ -47,7 +49,9 @@ function draw()
     imgui.Text("Will Align From: " .. starttime)
     imgui.Text("Will Align To: " .. endtime)
     imgui.Text("Current BPM: " .. bpm)
-    imgui.Text("Current Signature: " .. signature)
+    imgui.InputInt("Current Signature: ", signature)
+
+    state.SetValue("signature", signature)
 
     imgui.End()
 end
