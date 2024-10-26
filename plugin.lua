@@ -12,7 +12,7 @@ function draw()
     local signature = timingpoint.Signature
     local bpm = timingpoint.Bpm
     local mspb = 60000 / bpm
-    local msptl = mspb * signature
+    local msptl = mspb * 4
 
     if imgui.Button("Align Timing Points with Notes") then
         local times = {}
