@@ -8,22 +8,23 @@ function draw()
     local length = map.GetTimingPointLength(timingpoint)
     local endtime = starttime + length
     local signature = state.GetValue("signature") or 4
+    local bpm = timingpoint.Bpm
     if (timingpoint.Signature == time_signature.Quadruple) then
         signature = 4
     elseif (timingpoint.Signature == time_signature.Triple) then
         signature = 3
     end
-    local bpm = timingpoint.Bpm
-    local mspb = 60000 / bpm
-    local msptl = mspb * signature
-
-    local noteTimes = {}
-
-    for _, n in pairs(map.HitObjects) do
-        table.insert(noteTimes, n.StartTime)        
-    end
-
+    
     if imgui.Button("Align Timing Points with Notes") then
+        local mspb = 60000 / bpm
+        local msptl = mspb * signature
+    
+        local noteTimes = {}
+
+        for _, n in pairs(map.HitObjects) do
+            table.insert(noteTimes, n.StartTime)        
+        end
+
         local times = {}
         local timingpoints = {}
         for time=starttime,endtime,msptl do
